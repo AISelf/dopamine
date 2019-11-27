@@ -46,8 +46,8 @@ class GinConfigTest(tf.test.TestCase):
 
   def testDefaultGinDqn(self):
     """Test DQNAgent configuration using the default gin config."""
-    tf.logging.info('####### Training the DQN agent #####')
-    tf.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('####### Training the DQN agent #####')
+    tf.compat.v1.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/dqn/configs/dqn.gin']
     gin_bindings = [
         'WrappedReplayBuffer.replay_capacity = 100',  # To prevent OOM.
@@ -56,14 +56,14 @@ class GinConfigTest(tf.test.TestCase):
     run_experiment.load_gin_configs(gin_files, gin_bindings)
     runner = run_experiment.Runner(self._base_dir, run_experiment.create_agent,
                                    atari_lib.create_atari_environment)
-    self.assertIsInstance(runner._agent.optimizer, tf.train.RMSPropOptimizer)
+    self.assertIsInstance(runner._agent.optimizer, tf.compat.v1.train.RMSPropOptimizer)
     self.assertNear(0.00025, runner._agent.optimizer._learning_rate, 0.0001)
     shutil.rmtree(self._base_dir)
 
   def testOverrideRunnerParams(self):
     """Test DQNAgent configuration using the default gin config."""
-    tf.logging.info('####### Training the DQN agent #####')
-    tf.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('####### Training the DQN agent #####')
+    tf.compat.v1.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/dqn/configs/dqn.gin']
     gin_bindings = [
         'TrainRunner.base_dir = "{}"'.format(self._base_dir),
@@ -81,8 +81,8 @@ class GinConfigTest(tf.test.TestCase):
 
   def testDefaultGinRmspropDqn(self):
     """Test DQNAgent configuration overridden with RMSPropOptimizer."""
-    tf.logging.info('####### Training the DQN agent #####')
-    tf.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('####### Training the DQN agent #####')
+    tf.compat.v1.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/dqn/configs/dqn.gin']
     gin_bindings = [
         'DQNAgent.optimizer = @tf.train.RMSPropOptimizer()',
@@ -93,14 +93,14 @@ class GinConfigTest(tf.test.TestCase):
     run_experiment.load_gin_configs(gin_files, gin_bindings)
     runner = run_experiment.Runner(self._base_dir, run_experiment.create_agent,
                                    atari_lib.create_atari_environment)
-    self.assertIsInstance(runner._agent.optimizer, tf.train.RMSPropOptimizer)
+    self.assertIsInstance(runner._agent.optimizer, tf.compat.v1.train.RMSPropOptimizer)
     self.assertEqual(100, runner._agent.optimizer._learning_rate)
     shutil.rmtree(self._base_dir)
 
   def testOverrideGinDqn(self):
     """Test DQNAgent configuration overridden with AdamOptimizer."""
-    tf.logging.info('####### Training the DQN agent #####')
-    tf.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('####### Training the DQN agent #####')
+    tf.compat.v1.logging.info('####### DQN base_dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/dqn/configs/dqn.gin']
     gin_bindings = [
         'DQNAgent.optimizer = @tf.train.AdamOptimizer()',
@@ -112,14 +112,14 @@ class GinConfigTest(tf.test.TestCase):
     run_experiment.load_gin_configs(gin_files, gin_bindings)
     runner = run_experiment.Runner(self._base_dir, run_experiment.create_agent,
                                    atari_lib.create_atari_environment)
-    self.assertIsInstance(runner._agent.optimizer, tf.train.AdamOptimizer)
+    self.assertIsInstance(runner._agent.optimizer, tf.compat.v1.train.AdamOptimizer)
     self.assertEqual(100, runner._agent.optimizer._lr)
     shutil.rmtree(self._base_dir)
 
   def testDefaultGinRainbow(self):
     """Test RainbowAgent default configuration using default gin."""
-    tf.logging.info('####### Training the RAINBOW agent #####')
-    tf.logging.info('####### RAINBOW base_dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('####### Training the RAINBOW agent #####')
+    tf.compat.v1.logging.info('####### RAINBOW base_dir: {}'.format(self._base_dir))
     gin_files = [
         'dopamine/agents/rainbow/configs/rainbow.gin'
     ]
@@ -130,14 +130,14 @@ class GinConfigTest(tf.test.TestCase):
     run_experiment.load_gin_configs(gin_files, gin_bindings)
     runner = run_experiment.Runner(self._base_dir, run_experiment.create_agent,
                                    atari_lib.create_atari_environment)
-    self.assertIsInstance(runner._agent.optimizer, tf.train.AdamOptimizer)
+    self.assertIsInstance(runner._agent.optimizer, tf.compat.v1.train.AdamOptimizer)
     self.assertNear(0.0000625, runner._agent.optimizer._lr, 0.0001)
     shutil.rmtree(self._base_dir)
 
   def testOverrideGinRainbow(self):
     """Test RainbowAgent configuration overridden with RMSPropOptimizer."""
-    tf.logging.info('####### Training the RAINBOW agent #####')
-    tf.logging.info('####### RAINBOW base_dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('####### Training the RAINBOW agent #####')
+    tf.compat.v1.logging.info('####### RAINBOW base_dir: {}'.format(self._base_dir))
     gin_files = [
         'dopamine/agents/rainbow/configs/rainbow.gin',
     ]
@@ -150,7 +150,7 @@ class GinConfigTest(tf.test.TestCase):
     run_experiment.load_gin_configs(gin_files, gin_bindings)
     runner = run_experiment.Runner(self._base_dir, run_experiment.create_agent,
                                    atari_lib.create_atari_environment)
-    self.assertIsInstance(runner._agent.optimizer, tf.train.RMSPropOptimizer)
+    self.assertIsInstance(runner._agent.optimizer, tf.compat.v1.train.RMSPropOptimizer)
     self.assertEqual(100, runner._agent.optimizer._learning_rate)
     shutil.rmtree(self._base_dir)
 
@@ -220,11 +220,11 @@ class GinConfigTest(tf.test.TestCase):
 
   def testDefaultGinImplicitQuantileIcml(self):
     """Test default ImplicitQuantile configuration using ICML gin."""
-    tf.logging.info('###### Training the Implicit Quantile agent #####')
+    tf.compat.v1.logging.info('###### Training the Implicit Quantile agent #####')
     self._base_dir = os.path.join(
         '/tmp/dopamine_tests',
         datetime.datetime.utcnow().strftime('run_%Y_%m_%d_%H_%M_%S'))
-    tf.logging.info('###### IQN base dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('###### IQN base dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/'
                  'implicit_quantile/configs/implicit_quantile_icml.gin']
     gin_bindings = [
@@ -238,11 +238,11 @@ class GinConfigTest(tf.test.TestCase):
 
   def testOverrideGinImplicitQuantileIcml(self):
     """Test ImplicitQuantile configuration overriding using ICML gin."""
-    tf.logging.info('###### Training the Implicit Quantile agent #####')
+    tf.compat.v1.logging.info('###### Training the Implicit Quantile agent #####')
     self._base_dir = os.path.join(
         '/tmp/dopamine_tests',
         datetime.datetime.utcnow().strftime('run_%Y_%m_%d_%H_%M_%S'))
-    tf.logging.info('###### IQN base dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('###### IQN base dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/implicit_quantile/configs/'
                  'implicit_quantile_icml.gin']
     gin_bindings = [
@@ -257,11 +257,11 @@ class GinConfigTest(tf.test.TestCase):
 
   def testOverrideGinImplicitQuantile(self):
     """Test ImplicitQuantile configuration overriding using IQN gin."""
-    tf.logging.info('###### Training the Implicit Quantile agent #####')
+    tf.compat.v1.logging.info('###### Training the Implicit Quantile agent #####')
     self._base_dir = os.path.join(
         '/tmp/dopamine_tests',
         datetime.datetime.utcnow().strftime('run_%Y_%m_%d_%H_%M_%S'))
-    tf.logging.info('###### IQN base dir: {}'.format(self._base_dir))
+    tf.compat.v1.logging.info('###### IQN base dir: {}'.format(self._base_dir))
     gin_files = ['dopamine/agents/implicit_quantile/configs/'
                  'implicit_quantile.gin']
     gin_bindings = [

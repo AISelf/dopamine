@@ -66,7 +66,7 @@ class MyDQNAgent(dqn_agent.DQNAgent):
     return action
 
   def reload_checkpoint(self, checkpoint_path):
-    global_vars = set([x.name for x in tf.global_variables()])
+    global_vars = set([x.name for x in tf.compat.v1.global_variables()])
     ckpt_vars = [
         '{}:0'.format(name)
         for name, _ in tf.train.list_variables(checkpoint_path)
@@ -75,11 +75,11 @@ class MyDQNAgent(dqn_agent.DQNAgent):
     variables_to_restore = tf.contrib.slim.get_variables_to_restore(
         include=include_vars)
     if variables_to_restore:
-      reloader = tf.train.Saver(var_list=variables_to_restore)
+      reloader = tf.compat.v1.train.Saver(var_list=variables_to_restore)
       reloader.restore(self._sess, checkpoint_path)
-      tf.logging.info('Done restoring from %s', checkpoint_path)
+      tf.compat.v1.logging.info('Done restoring from %s', checkpoint_path)
     else:
-      tf.logging.info('Nothing to restore!')
+      tf.compat.v1.logging.info('Nothing to restore!')
 
   def get_q_values(self):
     return self.q_values
@@ -101,7 +101,7 @@ class MyRainbowAgent(rainbow_agent.RainbowAgent):
     return super(MyRainbowAgent, self).step(reward, observation)
 
   def reload_checkpoint(self, checkpoint_path):
-    global_vars = set([x.name for x in tf.global_variables()])
+    global_vars = set([x.name for x in tf.compat.v1.global_variables()])
     ckpt_vars = [
         '{}:0'.format(name)
         for name, _ in tf.train.list_variables(checkpoint_path)
@@ -110,11 +110,11 @@ class MyRainbowAgent(rainbow_agent.RainbowAgent):
     variables_to_restore = tf.contrib.slim.get_variables_to_restore(
         include=include_vars)
     if variables_to_restore:
-      reloader = tf.train.Saver(var_list=variables_to_restore)
+      reloader = tf.compat.v1.train.Saver(var_list=variables_to_restore)
       reloader.restore(self._sess, checkpoint_path)
-      tf.logging.info('Done restoring from %s', checkpoint_path)
+      tf.compat.v1.logging.info('Done restoring from %s', checkpoint_path)
     else:
-      tf.logging.info('Nothing to restore!')
+      tf.compat.v1.logging.info('Nothing to restore!')
 
   def get_probabilities(self):
     return self._sess.run(tf.squeeze(self._net_outputs.probabilities),
@@ -137,13 +137,13 @@ class MyRunner(run_experiment.Runner):
 
   def _run_one_iteration(self, iteration):
     statistics = iteration_statistics.IterationStatistics()
-    tf.logging.info('Starting iteration %d', iteration)
+    tf.compat.v1.logging.info('Starting iteration %d', iteration)
     _, _ = self._run_eval_phase(statistics)
     return statistics.data_lists
 
   def visualize(self, record_path, num_global_steps=500):
-    if not tf.gfile.Exists(record_path):
-      tf.gfile.MakeDirs(record_path)
+    if not tf.io.gfile.exists(record_path):
+      tf.io.gfile.makedirs(record_path)
     self._agent.eval_mode = True
 
     # Set up the game playback rendering.

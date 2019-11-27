@@ -87,8 +87,8 @@ class AtariIntegrationTest(tf.test.TestCase):
 
   def testIntegrationDqn(self):
     """Test the DQN agent."""
-    tf.logging.info('####### Training the DQN agent #####')
-    tf.logging.info('####### DQN base_dir: {}'.format(FLAGS.base_dir))
+    tf.compat.v1.logging.info('####### Training the DQN agent #####')
+    tf.compat.v1.logging.info('####### DQN base_dir: {}'.format(FLAGS.base_dir))
     self.quickDqnFlags()
     train.main([])
     self.verifyFilesCreated(FLAGS.base_dir)
@@ -96,8 +96,8 @@ class AtariIntegrationTest(tf.test.TestCase):
 
   def testIntegrationRainbow(self):
     """Test the rainbow agent."""
-    tf.logging.info('####### Training the Rainbow agent #####')
-    tf.logging.info('####### Rainbow base_dir: {}'.format(FLAGS.base_dir))
+    tf.compat.v1.logging.info('####### Training the Rainbow agent #####')
+    tf.compat.v1.logging.info('####### Rainbow base_dir: {}'.format(FLAGS.base_dir))
     self.quickRainbowFlags()
     train.main([])
     self.verifyFilesCreated(FLAGS.base_dir)

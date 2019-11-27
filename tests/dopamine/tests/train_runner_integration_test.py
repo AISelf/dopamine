@@ -70,8 +70,8 @@ class TrainRunnerIntegrationTest(tf.test.TestCase):
 
   def testIntegrationDqn(self):
     """Test the DQN agent."""
-    tf.logging.info('####### Training the DQN agent #####')
-    tf.logging.info('####### DQN base_dir: {}'.format(FLAGS.base_dir))
+    tf.compat.v1.logging.info('####### Training the DQN agent #####')
+    tf.compat.v1.logging.info('####### DQN base_dir: {}'.format(FLAGS.base_dir))
     self.quickDqnFlags()
     train.main([])
     self.verifyFilesCreated(FLAGS.base_dir)

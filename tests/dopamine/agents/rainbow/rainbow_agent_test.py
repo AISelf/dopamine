@@ -41,15 +41,15 @@ class ProjectDistributionTest(tf.test.TestCase):
 
   def testInconsistentSupportsAndWeightsWithPlaceholders(self):
     supports = [[0, 2, 4, 6, 8], [3, 4, 5, 6, 7]]
-    supports_ph = tf.placeholder(tf.float32, None)
+    supports_ph = tf.compat.v1.placeholder(tf.float32, None)
     weights = [[0.1, 0.2, 0.3, 0.2], [0.1, 0.2, 0.3, 0.2]]
-    weights_ph = tf.placeholder(tf.float32, None)
+    weights_ph = tf.compat.v1.placeholder(tf.float32, None)
     target_support = [4, 5, 6, 7, 8]
-    target_support_ph = tf.placeholder(tf.float32, None)
+    target_support_ph = tf.compat.v1.placeholder(tf.float32, None)
     projection = rainbow_agent.project_distribution(
         supports_ph, weights_ph, target_support_ph, validate_args=True)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
                                    'assertion failed'):
         sess.run(
@@ -71,15 +71,15 @@ class ProjectDistributionTest(tf.test.TestCase):
 
   def testInconsistentSupportsAndTargetSupportWithPlaceholders(self):
     supports = [[0, 2, 4, 6, 8], [3, 4, 5, 6, 7]]
-    supports_ph = tf.placeholder(tf.float32, None)
+    supports_ph = tf.compat.v1.placeholder(tf.float32, None)
     weights = [[0.1, 0.2, 0.3, 0.2, 0.2], [0.1, 0.2, 0.3, 0.2, 0.2]]
-    weights_ph = tf.placeholder(tf.float32, None)
+    weights_ph = tf.compat.v1.placeholder(tf.float32, None)
     target_support = [4, 5, 6]
-    target_support_ph = tf.placeholder(tf.float32, None)
+    target_support_ph = tf.compat.v1.placeholder(tf.float32, None)
     projection = rainbow_agent.project_distribution(
         supports_ph, weights_ph, target_support_ph, validate_args=True)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
                                    'assertion failed'):
         sess.run(
@@ -101,15 +101,15 @@ class ProjectDistributionTest(tf.test.TestCase):
 
   def testZeroDimensionalTargetSupportWithPlaceholders(self):
     supports = [[0, 2, 4, 6, 8], [3, 4, 5, 6, 7]]
-    supports_ph = tf.placeholder(tf.float32, None)
+    supports_ph = tf.compat.v1.placeholder(tf.float32, None)
     weights = [[0.1, 0.2, 0.3, 0.2, 0.2], [0.1, 0.2, 0.3, 0.2, 0.2]]
-    weights_ph = tf.placeholder(tf.float32, None)
+    weights_ph = tf.compat.v1.placeholder(tf.float32, None)
     target_support = 3
-    target_support_ph = tf.placeholder(tf.float32, None)
+    target_support_ph = tf.compat.v1.placeholder(tf.float32, None)
     projection = rainbow_agent.project_distribution(
         supports_ph, weights_ph, target_support_ph, validate_args=True)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       with (self.assertRaises(tf.errors.InvalidArgumentError)):
         sess.run(
             projection,
@@ -130,15 +130,15 @@ class ProjectDistributionTest(tf.test.TestCase):
 
   def testMultiDimensionalTargetSupportWithPlaceholders(self):
     supports = [[0, 2, 4, 6, 8], [3, 4, 5, 6, 7]]
-    supports_ph = tf.placeholder(tf.float32, None)
+    supports_ph = tf.compat.v1.placeholder(tf.float32, None)
     weights = [[0.1, 0.2, 0.3, 0.2, 0.2], [0.1, 0.2, 0.3, 0.2, 0.2]]
-    weights_ph = tf.placeholder(tf.float32, None)
+    weights_ph = tf.compat.v1.placeholder(tf.float32, None)
     target_support = [[3]]
-    target_support_ph = tf.placeholder(tf.float32, None)
+    target_support_ph = tf.compat.v1.placeholder(tf.float32, None)
     projection = rainbow_agent.project_distribution(
         supports_ph, weights_ph, target_support_ph, validate_args=True)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       with (self.assertRaises(tf.errors.InvalidArgumentError)):
         sess.run(
             projection,
@@ -157,7 +157,7 @@ class ProjectDistributionTest(tf.test.TestCase):
     projection = rainbow_agent.project_distribution(
         supports, weights, target_support, validate_args=True)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
                                    'assertion failed'):
         sess.run(projection)
@@ -171,7 +171,7 @@ class ProjectDistributionTest(tf.test.TestCase):
     projection = rainbow_agent.project_distribution(
         supports, weights, target_support, validate_args=True)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
                                    'assertion failed'):
         sess.run(projection)
@@ -184,7 +184,7 @@ class ProjectDistributionTest(tf.test.TestCase):
     projection = rainbow_agent.project_distribution(supports, weights,
                                                     target_support)
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(projection)
       self.assertAllClose([expected_weights], projection_)
 
@@ -196,7 +196,7 @@ class ProjectDistributionTest(tf.test.TestCase):
                                                     target_support)
     expected_projection = [[0.7, 0.3, 0.0, 0.0, 0.0]]
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(projection)
       self.assertAllClose(expected_projection, projection_)
 
@@ -208,7 +208,7 @@ class ProjectDistributionTest(tf.test.TestCase):
                                                     target_support)
     expected_projection = [[0.9, 0.1, 0.0, 0.0, 0.0]]
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(projection)
       self.assertAllClose(expected_projection, projection_)
 
@@ -223,7 +223,7 @@ class ProjectDistributionTest(tf.test.TestCase):
     expected_projections = [[0.8, 0.0, 0.1, 0.0, 0.1],
                             [0.8, 0.1, 0.1, 0.0, 0.0]]
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(projection)
       self.assertAllClose(expected_projections, projection_)
 
@@ -241,25 +241,25 @@ class ProjectDistributionTest(tf.test.TestCase):
                              0.2], [0.7, 0.3, 0.0, 0.0, 0.0],
                             [0.1, 0.2, 0.3, 0.2, 0.2]]
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(projection)
       self.assertAllClose(expected_projections, projection_)
 
   def testUsingPlaceholders(self):
     supports = [[0, 2, 4, 6, 8], [0, 1, 2, 3, 4], [3, 4, 5, 6, 7]]
-    supports_ph = tf.placeholder(tf.float32, None)
+    supports_ph = tf.compat.v1.placeholder(tf.float32, None)
     weights = [[0.1, 0.2, 0.3, 0.2, 0.2], [0.1, 0.2, 0.1, 0.3, 0.3],
                [0.1, 0.2, 0.3, 0.2, 0.2]]
-    weights_ph = tf.placeholder(tf.float32, None)
+    weights_ph = tf.compat.v1.placeholder(tf.float32, None)
     target_support = [3, 4, 5, 6, 7]
-    target_support_ph = tf.placeholder(tf.float32, None)
+    target_support_ph = tf.compat.v1.placeholder(tf.float32, None)
     projection = rainbow_agent.project_distribution(supports_ph, weights_ph,
                                                     target_support_ph)
     expected_projections = [[0.3, 0.3, 0.0, 0.2,
                              0.2], [0.7, 0.3, 0.0, 0.0, 0.0],
                             [0.1, 0.2, 0.3, 0.2, 0.2]]
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(
           projection,
           feed_dict={
@@ -281,7 +281,7 @@ class ProjectDistributionTest(tf.test.TestCase):
     expected_projections = [[0.2, 0.4, 0.4, 0.0, 0.0],
                             [0.0, 0.0, 0.45, 0.45, 0.1]]
     with self.test_session() as sess:
-      tf.global_variables_initializer().run()
+      tf.compat.v1.global_variables_initializer().run()
       projection_ = sess.run(projection)
       self.assertAllClose(expected_projections, projection_)
 
@@ -330,8 +330,8 @@ class RainbowAgentTest(tf.test.TestCase):
         weights_initializer = np.concatenate(([first_row], bottom_rows))
         self.layer = tf.keras.layers.Dense(
             self.num_actions * self.num_atoms,
-            kernel_initializer=tf.constant_initializer(weights_initializer),
-            bias_initializer=tf.ones_initializer())
+            kernel_initializer=tf.compat.v1.constant_initializer(weights_initializer),
+            bias_initializer=tf.compat.v1.ones_initializer())
 
       def call(self, state):
         inputs = tf.constant(
@@ -339,7 +339,7 @@ class RainbowAgentTest(tf.test.TestCase):
         net = self.layer(inputs)
         logits = tf.reshape(net, [-1, self.num_actions, self.num_atoms])
         probabilities = tf.keras.activations.softmax(logits)
-        qs = tf.reduce_sum(self.support * probabilities, axis=2)
+        qs = tf.reduce_sum(input_tensor=self.support * probabilities, axis=2)
         return atari_lib.RainbowNetworkType(qs, logits, probabilities)
 
     agent = rainbow_agent.RainbowAgent(
@@ -355,26 +355,26 @@ class RainbowAgentTest(tf.test.TestCase):
     # This ensures non-random action choices (since epsilon_eval = 0.0) and
     # skips the train_step.
     agent.eval_mode = True
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.compat.v1.global_variables_initializer())
     return agent
 
   def testCreateAgentWithDefaults(self):
     # Verifies that we can create and train an agent with the default values.
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = rainbow_agent.RainbowAgent(sess, num_actions=4)
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       observation = np.ones([84, 84, 1])
       agent.begin_episode(observation)
       agent.step(reward=1, observation=observation)
       agent.end_episode(reward=1)
 
   def testShapesAndValues(self):
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = self._create_test_agent(sess)
       self.assertEqual(agent._support.shape[0], self._num_atoms)
       self.assertEqual(
-          self.evaluate(tf.reduce_min(agent._support)), -self._vmax)
-      self.assertEqual(self.evaluate(tf.reduce_max(agent._support)), self._vmax)
+          self.evaluate(tf.reduce_min(input_tensor=agent._support)), -self._vmax)
+      self.assertEqual(self.evaluate(tf.reduce_max(input_tensor=agent._support)), self._vmax)
       self.assertEqual(agent._net_outputs.logits.shape,
                        (1, self._num_actions, self._num_atoms))
       self.assertEqual(agent._net_outputs.probabilities.shape,
@@ -395,7 +395,7 @@ class RainbowAgentTest(tf.test.TestCase):
 
     Specifically, the action returned and its effect on the state.
     """
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = self._create_test_agent(sess)
       # We fill up the state with 9s. On calling agent.begin_episode the state
       # should be reset to all 0s.
@@ -431,14 +431,14 @@ class RainbowAgentTest(tf.test.TestCase):
 
     Specifically, the action returned, and confirms that no training happens.
     """
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = self._create_test_agent(sess)
       base_observation = np.ones(self.observation_shape + (1,))
       # This will reset state and choose a first action.
       agent.begin_episode(base_observation)
       # We mock the replay buffer to verify how the agent interacts with it.
       agent._replay = test_utils.MockReplayBuffer()
-      self.evaluate(tf.global_variables_initializer())
+      self.evaluate(tf.compat.v1.global_variables_initializer())
 
       expected_state = self.zero_state
       num_steps = 10
@@ -466,13 +466,13 @@ class RainbowAgentTest(tf.test.TestCase):
 
     Specifically, the action returned, and confirms training is happening.
     """
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = self._create_test_agent(sess)
       agent.eval_mode = False
       base_observation = np.ones(self.observation_shape + (1,))
       # We mock the replay buffer to verify how the agent interacts with it.
       agent._replay = test_utils.MockReplayBuffer()
-      self.evaluate(tf.global_variables_initializer())
+      self.evaluate(tf.compat.v1.global_variables_initializer())
       # This will reset state and choose a first action.
       agent.begin_episode(base_observation)
 
@@ -500,7 +500,7 @@ class RainbowAgentTest(tf.test.TestCase):
       self.assertEqual(agent._replay.add.call_count, num_steps + 1)
 
   def testStoreTransitionWithUniformSampling(self):
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = rainbow_agent.RainbowAgent(
           sess, num_actions=4, replay_scheme='uniform')
       dummy_frame = np.zeros((84, 84))
@@ -514,7 +514,7 @@ class RainbowAgentTest(tf.test.TestCase):
       self.assertAllEqual(returned_priorities, expected_priorities)
 
   def testStoreTransitionWithPrioritizedSamplingy(self):
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
       agent = rainbow_agent.RainbowAgent(
           sess, num_actions=4, replay_scheme='prioritized')
       dummy_frame = np.zeros((84, 84))

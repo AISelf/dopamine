@@ -385,7 +385,7 @@ class CartpoleRainbowNetwork(tf.keras.Model):
     x = self.net(state)
     logits = tf.reshape(x, [-1, self.num_actions, self.num_atoms])
     probabilities = tf.contrib.layers.softmax(logits)
-    q_values = tf.reduce_sum(self.support * probabilities, axis=2)
+    q_values = tf.reduce_sum(input_tensor=self.support * probabilities, axis=2)
     return atari_lib.RainbowNetworkType(q_values, logits, probabilities)
 
 
@@ -409,7 +409,7 @@ def cartpole_rainbow_network(num_actions, num_atoms, support, network_type,
       num_atoms=num_atoms)
   logits = tf.reshape(net, [-1, num_actions, num_atoms])
   probabilities = tf.contrib.layers.softmax(logits)
-  q_values = tf.reduce_sum(support * probabilities, axis=2)
+  q_values = tf.reduce_sum(input_tensor=support * probabilities, axis=2)
   return network_type(q_values, logits, probabilities)
 
 
@@ -517,7 +517,7 @@ class AcrobotRainbowNetwork(tf.keras.Model):
     x = self.net(state)
     logits = tf.reshape(x, [-1, self.num_actions, self.num_atoms])
     probabilities = tf.contrib.layers.softmax(logits)
-    q_values = tf.reduce_sum(self.support * probabilities, axis=2)
+    q_values = tf.reduce_sum(input_tensor=self.support * probabilities, axis=2)
     return atari_lib.RainbowNetworkType(q_values, logits, probabilities)
 
 
@@ -541,7 +541,7 @@ def acrobot_rainbow_network(num_actions, num_atoms, support, network_type,
       num_atoms=num_atoms)
   logits = tf.reshape(net, [-1, num_actions, num_atoms])
   probabilities = tf.contrib.layers.softmax(logits)
-  q_values = tf.reduce_sum(support * probabilities, axis=2)
+  q_values = tf.reduce_sum(input_tensor=support * probabilities, axis=2)
   return network_type(q_values, logits, probabilities)
 
 

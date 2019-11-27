@@ -55,8 +55,8 @@ class ImplicitQuantileAgentTest(tf.test.TestCase):
         super(MockImplicitQuantileNetwork, self).__init__(**kwargs)
         self.num_actions = num_actions
         self.layer = tf.keras.layers.Dense(
-            self.num_actions, kernel_initializer=tf.ones_initializer(),
-            bias_initializer=tf.zeros_initializer())
+            self.num_actions, kernel_initializer=tf.compat.v1.ones_initializer(),
+            bias_initializer=tf.compat.v1.zeros_initializer())
 
       def call(self, state, num_quantiles):
         batch_size = state.get_shape().as_list()[0]
@@ -79,14 +79,14 @@ class ImplicitQuantileAgentTest(tf.test.TestCase):
     # This ensures non-random action choices (since epsilon_eval = 0.0) and
     # skips the train_step.
     agent.eval_mode = True
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.compat.v1.global_variables_initializer())
     return agent
 
   def testCreateAgentWithDefaults(self):
     # Verifies that we can create and train an agent with the default values.
     with self.test_session(use_gpu=False) as sess:
       agent = implicit_quantile_agent.ImplicitQuantileAgent(sess, num_actions=4)
-      sess.run(tf.global_variables_initializer())
+      sess.run(tf.compat.v1.global_variables_initializer())
       observation = np.ones([84, 84, 1])
       agent.begin_episode(observation)
       agent.step(reward=1, observation=observation)

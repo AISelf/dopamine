@@ -72,7 +72,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
                replay_scheme='prioritized',
                tf_device='/cpu:*',
                use_staging=True,
-               optimizer=tf.train.AdamOptimizer(
+               optimizer=tf.compat.v1.train.AdamOptimizer(
                    learning_rate=0.00025, epsilon=0.0003125),
                summary_writer=None,
                summary_writing_frequency=500):
@@ -226,8 +226,8 @@ class RainbowAgent(dqn_agent.DQNAgent):
 
     # size of next_qt_argmax: 1 x batch_size
     next_qt_argmax = tf.argmax(
-        self._replay_next_target_net_outputs.q_values, axis=1)[:, None]
-    batch_indices = tf.range(tf.to_int64(batch_size))[:, None]
+        input=self._replay_next_target_net_outputs.q_values, axis=1)[:, None]
+    batch_indices = tf.range(tf.cast(batch_size, dtype=tf.int64))[:, None]
     # size of next_qt_argmax: batch_size x 2
     batch_indexed_next_qt_argmax = tf.concat(
         [batch_indices, next_qt_argmax], axis=1)
@@ -249,7 +249,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
     target_distribution = tf.stop_gradient(self._build_target_distribution())
 
     # size of indices: batch_size x 1.
-    indices = tf.range(tf.shape(self._replay_net_outputs.logits)[0])[:, None]
+    indices = tf.range(tf.shape(input=self._replay_net_outputs.logits)[0])[:, None]
     # size of reshaped_actions: batch_size x 2.
     reshaped_actions = tf.concat([indices, self._replay.actions[:, None]], 1)
     # For each element of the batch, fetch the logits for its selected action.
@@ -257,7 +257,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
                                         reshaped_actions)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(
-        labels=target_distribution,
+        labels=tf.stop_gradient(target_distribution),
         logits=chosen_action_logits)
 
     if self._replay_scheme == 'prioritized':
@@ -267,7 +267,7 @@ class RainbowAgent(dqn_agent.DQNAgent):
       # a fixed exponent actually performs better, except on Pong.
       probs = self._replay.transition['sampling_probabilities']
       loss_weights = 1.0 / tf.sqrt(probs + 1e-10)
-      loss_weights /= tf.reduce_max(loss_weights)
+      loss_weights /= tf.reduce_max(input_tensor=loss_weights)
 
       # Rainbow and prioritized replay are parametrized by an exponent alpha,
       # but in both cases it is set to 0.5 - for simplicity's sake we leave it
@@ -286,12 +286,12 @@ class RainbowAgent(dqn_agent.DQNAgent):
 
     with tf.control_dependencies([update_priorities_op]):
       if self.summary_writer is not None:
-        with tf.variable_scope('Losses'):
-          tf.summary.scalar('CrossEntropyLoss', tf.reduce_mean(loss))
+        with tf.compat.v1.variable_scope('Losses'):
+          tf.compat.v1.summary.scalar('CrossEntropyLoss', tf.reduce_mean(input_tensor=loss))
       # Schaul et al. reports a slightly different rule, where 1/N is also
       # exponentiated by beta. Not doing so seems more reasonable, and did not
       # impact performance in our experiments.
-      return self.optimizer.minimize(tf.reduce_mean(loss)), loss
+      return self.optimizer.minimize(tf.reduce_mean(input_tensor=loss)), loss
 
   def _store_transition(self,
                         last_observation,
@@ -378,35 +378,35 @@ def project_distribution(supports, weights, target_support,
     # Assert that supports and weights have the same shapes.
     validate_deps.append(
         tf.Assert(
-            tf.reduce_all(tf.equal(tf.shape(supports), tf.shape(weights))),
+            tf.reduce_all(input_tensor=tf.equal(tf.shape(input=supports), tf.shape(input=weights))),
             [supports, weights]))
     # Assert that elements of supports and target_support have the same shape.
     validate_deps.append(
         tf.Assert(
             tf.reduce_all(
-                tf.equal(tf.shape(supports)[1], tf.shape(target_support))),
+                input_tensor=tf.equal(tf.shape(input=supports)[1], tf.shape(input=target_support))),
             [supports, target_support]))
     # Assert that target_support has a single dimension.
     validate_deps.append(
         tf.Assert(
-            tf.equal(tf.size(tf.shape(target_support)), 1), [target_support]))
+            tf.equal(tf.size(input=tf.shape(input=target_support)), 1), [target_support]))
     # Assert that the target_support is monotonically increasing.
     validate_deps.append(
-        tf.Assert(tf.reduce_all(target_support_deltas > 0), [target_support]))
+        tf.Assert(tf.reduce_all(input_tensor=target_support_deltas > 0), [target_support]))
     # Assert that the values in target_support are equally spaced.
     validate_deps.append(
         tf.Assert(
-            tf.reduce_all(tf.equal(target_support_deltas, delta_z)),
+            tf.reduce_all(input_tensor=tf.equal(target_support_deltas, delta_z)),
             [target_support]))
 
   with tf.control_dependencies(validate_deps):
     # Ex: `v_min, v_max = 4, 8`.
     v_min, v_max = target_support[0], target_support[-1]
     # Ex: `batch_size = 2`.
-    batch_size = tf.shape(supports)[0]
+    batch_size = tf.shape(input=supports)[0]
     # `N` in Eq7.
     # Ex: `num_dims = 5`.
-    num_dims = tf.shape(target_support)[0]
+    num_dims = tf.shape(input=target_support)[0]
     # clipped_support = `[\hat{T}_{z_j}]^{V_max}_{V_min}` in Eq7.
     # Ex: `clipped_support = [[[ 4.  4.  4.  6.  8.]]
     #                         [[ 4.  4.  4.  5.  6.]]]`.
@@ -478,6 +478,6 @@ def project_distribution(supports, weights, target_support,
     inner_prod = clipped_quotient * weights
     # Ex: `projection = [[ 0.8 0.0 0.1 0.0 0.1]
     #                    [ 0.8 0.1 0.1 0.0 0.0]]`.
-    projection = tf.reduce_sum(inner_prod, 3)
+    projection = tf.reduce_sum(input_tensor=inner_prod, axis=3)
     projection = tf.reshape(projection, [batch_size, num_dims])
     return projection

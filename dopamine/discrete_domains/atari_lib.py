@@ -116,7 +116,7 @@ def nature_dqn_network(num_actions, network_type, state):
     net: _network_type object containing the tensors output by the network.
   """
   net = tf.cast(state, tf.float32)
-  net = tf.div(net, 255.)
+  net = tf.compat.v1.div(net, 255.)
   net = tf.contrib.slim.conv2d(net, 32, [8, 8], stride=4)
   net = tf.contrib.slim.conv2d(net, 64, [4, 4], stride=2)
   net = tf.contrib.slim.conv2d(net, 64, [3, 3], stride=1)
@@ -144,7 +144,7 @@ def rainbow_network(num_actions, num_atoms, support, network_type, state):
       factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
 
   net = tf.cast(state, tf.float32)
-  net = tf.div(net, 255.)
+  net = tf.compat.v1.div(net, 255.)
   net = tf.contrib.slim.conv2d(
       net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
   net = tf.contrib.slim.conv2d(
@@ -162,7 +162,7 @@ def rainbow_network(num_actions, num_atoms, support, network_type, state):
 
   logits = tf.reshape(net, [-1, num_actions, num_atoms])
   probabilities = tf.contrib.layers.softmax(logits)
-  q_values = tf.reduce_sum(support * probabilities, axis=2)
+  q_values = tf.reduce_sum(input_tensor=support * probabilities, axis=2)
   return network_type(q_values, logits, probabilities)
 
 
@@ -184,7 +184,7 @@ def implicit_quantile_network(num_actions, quantile_embedding_dim,
       factor=1.0 / np.sqrt(3.0), mode='FAN_IN', uniform=True)
 
   state_net = tf.cast(state, tf.float32)
-  state_net = tf.div(state_net, 255.)
+  state_net = tf.compat.v1.div(state_net, 255.)
   state_net = tf.contrib.slim.conv2d(
       state_net, 32, [8, 8], stride=4, weights_initializer=weights_initializer)
   state_net = tf.contrib.slim.conv2d(
@@ -197,7 +197,7 @@ def implicit_quantile_network(num_actions, quantile_embedding_dim,
 
   batch_size = state_net.get_shape().as_list()[0]
   quantiles_shape = [num_quantiles * batch_size, 1]
-  quantiles = tf.random_uniform(
+  quantiles = tf.random.uniform(
       quantiles_shape, minval=0, maxval=1, dtype=tf.float32)
 
   quantile_net = tf.tile(quantiles, [1, quantile_embedding_dim])
@@ -236,7 +236,7 @@ def maybe_transform_variable_names(variables, legacy_checkpoint_load=False):
   Returns:
     dict or None, of <new_names, var>.
   """
-  tf.logging.info('legacy_checkpoint_load: %s', legacy_checkpoint_load)
+  tf.compat.v1.logging.info('legacy_checkpoint_load: %s', legacy_checkpoint_load)
   if legacy_checkpoint_load:
     name_map = {}
     for var in variables:
@@ -291,7 +291,7 @@ class NatureDQNNetwork(tf.keras.Model):
       collections.namedtuple, output ops (graph mode) or output tensors (eager).
     """
     x = tf.cast(state, tf.float32)
-    x = tf.div(x, 255.)
+    x = tf.compat.v1.div(x, 255.)
     x = self.conv1(x)
     x = self.conv2(x)
     x = self.conv3(x)
@@ -318,7 +318,7 @@ class RainbowNetwork(tf.keras.Model):
     self.num_actions = num_actions
     self.num_atoms = num_atoms
     self.support = support
-    self.kernel_initializer = tf.keras.initializers.VarianceScaling(
+    self.kernel_initializer = tf.compat.v1.keras.initializers.VarianceScaling(
         scale=1.0 / np.sqrt(3.0), mode='fan_in', distribution='uniform')
     # Defining layers.
     self.conv1 = tf.keras.layers.Conv2D(
@@ -351,7 +351,7 @@ class RainbowNetwork(tf.keras.Model):
       collections.namedtuple, output ops (graph mode) or output tensors (eager).
     """
     x = tf.cast(state, tf.float32)
-    x = tf.div(x, 255.)
+    x = tf.compat.v1.div(x, 255.)
     x = self.conv1(x)
     x = self.conv2(x)
     x = self.conv3(x)
@@ -360,7 +360,7 @@ class RainbowNetwork(tf.keras.Model):
     x = self.dense2(x)
     logits = tf.reshape(x, [-1, self.num_actions, self.num_atoms])
     probabilities = tf.keras.activations.softmax(logits)
-    q_values = tf.reduce_sum(self.support * probabilities, axis=2)
+    q_values = tf.reduce_sum(input_tensor=self.support * probabilities, axis=2)
     return RainbowNetworkType(q_values, logits, probabilities)
 
 
@@ -380,7 +380,7 @@ class ImplicitQuantileNetwork(tf.keras.Model):
     self.quantile_embedding_dim = quantile_embedding_dim
     # We need the activation function during `call`, therefore set the field.
     self.activation_fn = tf.keras.activations.relu
-    self.kernel_initializer = tf.keras.initializers.VarianceScaling(
+    self.kernel_initializer = tf.compat.v1.keras.initializers.VarianceScaling(
         scale=1.0 / np.sqrt(3.0), mode='fan_in', distribution='uniform')
     # Defining layers.
     self.conv1 = tf.keras.layers.Conv2D(
@@ -415,7 +415,7 @@ class ImplicitQuantileNetwork(tf.keras.Model):
     """
     batch_size = state.get_shape().as_list()[0]
     x = tf.cast(state, tf.float32)
-    x = tf.div(x, 255.)
+    x = tf.compat.v1.div(x, 255.)
     x = self.conv1(x)
     x = self.conv2(x)
     x = self.conv3(x)
@@ -423,7 +423,7 @@ class ImplicitQuantileNetwork(tf.keras.Model):
     state_vector_length = x.get_shape().as_list()[-1]
     state_net_tiled = tf.tile(x, [num_quantiles, 1])
     quantiles_shape = [num_quantiles * batch_size, 1]
-    quantiles = tf.random_uniform(
+    quantiles = tf.random.uniform(
         quantiles_shape, minval=0, maxval=1, dtype=tf.float32)
     quantile_net = tf.tile(quantiles, [1, self.quantile_embedding_dim])
     pi = tf.constant(math.pi)

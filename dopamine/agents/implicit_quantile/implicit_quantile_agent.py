@@ -133,8 +133,8 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
     # Vals for Quantile .2  Vals for Quantile .4  Vals for Quantile .6
     #    [[0.1, 0.5],         [0.15, -0.3],          [0.15, -0.2]]
     # Q-values = [(0.1 + 0.15 + 0.15)/3, (0.5 + 0.15 + -0.2)/3].
-    self._q_values = tf.reduce_mean(self._net_outputs.quantile_values, axis=0)
-    self._q_argmax = tf.argmax(self._q_values, axis=0)
+    self._q_values = tf.reduce_mean(input_tensor=self._net_outputs.quantile_values, axis=0)
+    self._q_argmax = tf.argmax(input=self._q_values, axis=0)
 
     self._replay_net_outputs = self.online_convnet(self._replay.states,
                                                    self.num_tau_samples)
@@ -167,9 +167,9 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
                                                 self.num_actions])
     # Shape: batch_size x num_actions.
     self._replay_net_target_q_values = tf.squeeze(tf.reduce_mean(
-        target_quantile_values_action, axis=0))
+        input_tensor=target_quantile_values_action, axis=0))
     self._replay_next_qt_argmax = tf.argmax(
-        self._replay_net_target_q_values, axis=1)
+        input=self._replay_net_target_q_values, axis=1)
 
   def _build_target_quantile_values_op(self):
     """Build an op used as a target for return values at given quantiles.
@@ -177,12 +177,12 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
     Returns:
       An op calculating the target quantile return.
     """
-    batch_size = tf.shape(self._replay.rewards)[0]
+    batch_size = tf.shape(input=self._replay.rewards)[0]
     # Shape of rewards: (num_tau_prime_samples x batch_size) x 1.
     rewards = self._replay.rewards[:, None]
     rewards = tf.tile(rewards, [self.num_tau_prime_samples, 1])
 
-    is_terminal_multiplier = 1. - tf.to_float(self._replay.terminals)
+    is_terminal_multiplier = 1. - tf.cast(self._replay.terminals, dtype=tf.float32)
     # Incorporate terminal state to discount factor.
     # size of gamma_with_terminal: (num_tau_prime_samples x batch_size) x 1.
     gamma_with_terminal = self.cumulative_gamma * is_terminal_multiplier
@@ -217,7 +217,7 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
     Returns:
       train_op: An op performing one step of training from replay data.
     """
-    batch_size = tf.shape(self._replay.rewards)[0]
+    batch_size = tf.shape(input=self._replay.rewards)[0]
 
     target_quantile_values = tf.stop_gradient(
         self._build_target_quantile_values_op())
@@ -231,7 +231,7 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
     # Bellman errors.
     # Final shape of target_quantile_values:
     # batch_size x num_tau_prime_samples x 1.
-    target_quantile_values = tf.transpose(target_quantile_values, [1, 0, 2])
+    target_quantile_values = tf.transpose(a=target_quantile_values, perm=[1, 0, 2])
 
     # Shape of indices: (num_tau_samples x batch_size) x 1.
     # Expand dimension by one so that it can be used to index into all the
@@ -258,7 +258,7 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
     # Final shape of chosen_action_quantile_values:
     # batch_size x num_tau_samples x 1.
     chosen_action_quantile_values = tf.transpose(
-        chosen_action_quantile_values, [1, 0, 2])
+        a=chosen_action_quantile_values, perm=[1, 0, 2])
 
     # Shape of bellman_erors and huber_loss:
     # batch_size x num_tau_prime_samples x num_tau_samples x 1.
@@ -267,38 +267,38 @@ class ImplicitQuantileAgent(rainbow_agent.RainbowAgent):
     # The huber loss (see Section 2.3 of the paper) is defined via two cases:
     # case_one: |bellman_errors| <= kappa
     # case_two: |bellman_errors| > kappa
-    huber_loss_case_one = tf.to_float(
-        tf.abs(bellman_errors) <= self.kappa) * 0.5 * bellman_errors ** 2
-    huber_loss_case_two = tf.to_float(
-        tf.abs(bellman_errors) > self.kappa) * self.kappa * (
+    huber_loss_case_one = tf.cast(
+        tf.abs(bellman_errors) <= self.kappa, dtype=tf.float32) * 0.5 * bellman_errors ** 2
+    huber_loss_case_two = tf.cast(
+        tf.abs(bellman_errors) > self.kappa, dtype=tf.float32) * self.kappa * (
             tf.abs(bellman_errors) - 0.5 * self.kappa)
     huber_loss = huber_loss_case_one + huber_loss_case_two
 
     # Reshape replay_quantiles to batch_size x num_tau_samples x 1
     replay_quantiles = tf.reshape(
         self._replay_net_quantiles, [self.num_tau_samples, batch_size, 1])
-    replay_quantiles = tf.transpose(replay_quantiles, [1, 0, 2])
+    replay_quantiles = tf.transpose(a=replay_quantiles, perm=[1, 0, 2])
 
     # Tile by num_tau_prime_samples along a new dimension. Shape is now
     # batch_size x num_tau_prime_samples x num_tau_samples x 1.
     # These quantiles will be used for computation of the quantile huber loss
     # below (see section 2.3 of the paper).
-    replay_quantiles = tf.to_float(tf.tile(
-        replay_quantiles[:, None, :, :], [1, self.num_tau_prime_samples, 1, 1]))
+    replay_quantiles = tf.cast(tf.tile(
+        replay_quantiles[:, None, :, :], [1, self.num_tau_prime_samples, 1, 1]), dtype=tf.float32)
     # Shape: batch_size x num_tau_prime_samples x num_tau_samples x 1.
     quantile_huber_loss = (tf.abs(replay_quantiles - tf.stop_gradient(
-        tf.to_float(bellman_errors < 0))) * huber_loss) / self.kappa
+        tf.cast(bellman_errors < 0, dtype=tf.float32))) * huber_loss) / self.kappa
     # Sum over current quantile value (num_tau_samples) dimension,
     # average over target quantile value (num_tau_prime_samples) dimension.
     # Shape: batch_size x num_tau_prime_samples x 1.
-    loss = tf.reduce_sum(quantile_huber_loss, axis=2)
+    loss = tf.reduce_sum(input_tensor=quantile_huber_loss, axis=2)
     # Shape: batch_size x 1.
-    loss = tf.reduce_mean(loss, axis=1)
+    loss = tf.reduce_mean(input_tensor=loss, axis=1)
 
     # TODO(kumasaurabh): Add prioritized replay functionality here.
     update_priorities_op = tf.no_op()
     with tf.control_dependencies([update_priorities_op]):
       if self.summary_writer is not None:
-        with tf.variable_scope('Losses'):
-          tf.summary.scalar('QuantileLoss', tf.reduce_mean(loss))
-      return self.optimizer.minimize(tf.reduce_mean(loss)), tf.reduce_mean(loss)
+        with tf.compat.v1.variable_scope('Losses'):
+          tf.compat.v1.summary.scalar('QuantileLoss', tf.reduce_mean(input_tensor=loss))
+      return self.optimizer.minimize(tf.reduce_mean(input_tensor=loss)), tf.reduce_mean(input_tensor=loss)
